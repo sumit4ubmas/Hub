@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>Home Hub</title>
+<!-- iPadOS/iOS: Share → Add to Home Screen uses these to launch full-screen,
+     with no Safari address bar or toolbar, like a real installed app. -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Home Hub"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#EFE7D7"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -138,6 +145,7 @@ button{cursor:pointer}
   border:1px solid var(--border);
   border-radius:999px;
   position:sticky;top:14px;z-index:100;gap:12px;
+  top:calc(14px + env(safe-area-inset-top));
   box-shadow:var(--sh-1);
 }
 .brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -178,6 +186,7 @@ button{cursor:pointer}
 /* ── Bottom Nav ── */
 .bottomnav{
   position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  bottom:calc(18px + env(safe-area-inset-bottom));
   background:color-mix(in oklab, var(--surface) 92%, transparent);
   backdrop-filter:saturate(140%) blur(14px); -webkit-backdrop-filter:saturate(140%) blur(14px);
   border:1px solid var(--border);
