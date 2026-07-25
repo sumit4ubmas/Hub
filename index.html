@@ -1036,6 +1036,11 @@ button{cursor:pointer}
 .feature-tab.on { background: var(--text); color: var(--surface); border-color: var(--text); }
 
 /* ══ Revision additions ═════════════════════════════════════ */
+.unit-toggle{display:flex;border:1px solid var(--border);border-radius:99px;overflow:hidden}
+.unit-btn{border:none;background:var(--s2);color:var(--text2);font-weight:700;font-size:.78rem;
+  padding:6px 14px;cursor:pointer;font-family:inherit;transition:all .15s var(--ease)}
+.unit-btn.on{background:var(--accent);color:#fff}
+.unit-btn:not(.on):hover{background:var(--accbg)}
 .error-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;
   width:min(680px,calc(100vw - 24px));background:var(--redbg);color:var(--red-ink);
   border:1px solid var(--red);border-radius:var(--rsm);padding:12px 14px;box-shadow:var(--sh-3);
@@ -1746,6 +1751,7 @@ async function loadData(){
     if(S.settings.theme==='dark'||S.isDark) document.documentElement.setAttribute('data-dark','');
     hideErrorBanner();
     await rolloverRecurringTasks();
+    if(typeof refreshWeather === 'function') refreshWeather();
   } catch(e) {
     console.error('Load error:', e);
     showErrorBanner(e);
@@ -3320,47 +3326,116 @@ const DEMO_NOTIFS = [
   { id:'n5', ico:'🛒', msg:"Grocery list: 12 items ready to send to Instacart", time:'Yesterday', unread:false },
 ];
 
-// ── WEATHER SIMULATION ──
-const WEATHER_ICONS = {
-  sunny: '☀️', cloudy: '⛅', rainy: '🌧️', stormy: '⛈️',
-  snowy: '❄️', windy: '💨', foggy: '🌫️', partlyCloudy: '🌤️',
+// ═══════════════════════════════════════════════════════════════
+// WEATHER — real conditions from Open-Meteo (no API key needed).
+// Location is whatever the family typed into Settings → Weather
+// (a city name or a 5-digit US zip); it is resolved to lat/lon once
+// and the result is cached in Settings so we don't re-geocode on
+// every refresh. No location set → the widget asks for one instead
+// of silently showing made-up numbers.
+// ═══════════════════════════════════════════════════════════════
+const WMO_WEATHER = {
+  0:{ico:'☀️',desc:'Clear'}, 1:{ico:'🌤️',desc:'Mostly Clear'}, 2:{ico:'⛅',desc:'Partly Cloudy'},
+  3:{ico:'☁️',desc:'Overcast'}, 45:{ico:'🌫️',desc:'Foggy'}, 48:{ico:'🌫️',desc:'Foggy'},
+  51:{ico:'🌦️',desc:'Light Drizzle'}, 53:{ico:'🌦️',desc:'Drizzle'}, 55:{ico:'🌧️',desc:'Heavy Drizzle'},
+  61:{ico:'🌧️',desc:'Light Rain'}, 63:{ico:'🌧️',desc:'Rain'}, 65:{ico:'🌧️',desc:'Heavy Rain'},
+  71:{ico:'❄️',desc:'Light Snow'}, 73:{ico:'❄️',desc:'Snow'}, 75:{ico:'❄️',desc:'Heavy Snow'}, 77:{ico:'❄️',desc:'Snow Grains'},
+  80:{ico:'🌦️',desc:'Rain Showers'}, 81:{ico:'🌧️',desc:'Rain Showers'}, 82:{ico:'⛈️',desc:'Violent Showers'},
+  85:{ico:'🌨️',desc:'Snow Showers'}, 86:{ico:'🌨️',desc:'Heavy Snow Showers'},
+  95:{ico:'⛈️',desc:'Thunderstorm'}, 96:{ico:'⛈️',desc:'Thunderstorm + Hail'}, 99:{ico:'⛈️',desc:'Severe Thunderstorm'},
 };
-const CONDITIONS = ['sunny','partlyCloudy','cloudy','rainy'];
-const HOURLY_DESC = { sunny:'Sunny', partlyCloudy:'Partly Cloudy', cloudy:'Cloudy', rainy:'Light Rain' };
+function wmoLookup(code){ return WMO_WEATHER[code] || {ico:'🌡️',desc:'—'}; }
 
-function generateWeather() {
-  const cond = CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)];
-  const baseTemp = 65 + Math.floor(Math.random() * 20);
-  const hourly = Array.from({length: 12}, (_, i) => ({
-    hour: (new Date().getHours() + i) % 24,
-    ico: WEATHER_ICONS[CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)]],
-    temp: baseTemp + Math.floor(Math.random() * 8) - 4,
-    precip: Math.floor(Math.random() * 40),
-  }));
-  const daily = ['Today','Mon','Tue','Wed','Thu','Fri','Sat'].map((day, i) => ({
-    day,
-    ico: WEATHER_ICONS[CONDITIONS[Math.floor(Math.random() * CONDITIONS.length)]],
-    hi: baseTemp + Math.floor(Math.random() * 10) - 2,
-    lo: baseTemp - 12 + Math.floor(Math.random() * 6),
-  }));
+function getWeatherSetting(){
+  try { return JSON.parse(S.settings.weather_location || '{}'); } catch(e){ return {}; }
+}
+
+// A typed 5-digit number is treated as a US zip (Zippopotam — free, exact,
+// no key). Anything else goes through Open-Meteo's free geocoding search,
+// which handles city names and "City, ST" reasonably well.
+async function resolveWeatherLocation(query){
+  const q = String(query||'').trim();
+  if(!q) throw new Error('No location set');
+  if(/^\d{5}$/.test(q)){
+    const res = await fetch(`https://api.zippopotam.us/us/${q}`);
+    if(!res.ok) throw new Error('Zip code not found: ' + q);
+    const j = await res.json();
+    const place = j.places && j.places[0];
+    if(!place) throw new Error('Zip code not found: ' + q);
+    return {
+      lat: parseFloat(place.latitude), lon: parseFloat(place.longitude),
+      label: `${place['place name']}, ${place['state abbreviation']}`,
+    };
+  }
+  const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=en&format=json`);
+  if(!res.ok) throw new Error('Location lookup failed');
+  const j = await res.json();
+  const place = j.results && j.results[0];
+  if(!place) throw new Error('Could not find "' + q + '" — try a nearby city name');
+  const region = place.admin1 ? ', ' + place.admin1 : (place.country ? ', ' + place.country : '');
+  return { lat: place.latitude, lon: place.longitude, label: place.name + region };
+}
+
+async function fetchWeatherForLocation(loc, unit){
+  unit = unit === 'C' ? 'C' : 'F'; // default Fahrenheit
+  const tempUnit = unit === 'C' ? 'celsius' : 'fahrenheit';
+  const windUnit = unit === 'C' ? 'kmh' : 'mph';
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
+    + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min`
+    + `&temperature_unit=${tempUnit}&wind_speed_unit=${windUnit}&timezone=auto&forecast_days=7`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Weather service unavailable (HTTP ' + res.status + ')');
+  const j = await res.json();
+  const cur = j.current || {};
+  const now = wmoLookup(cur.weather_code);
+  const dailyTimes = (j.daily && j.daily.time) || [];
+  const daily = dailyTimes.map((d, i) => {
+    const dow = i === 0 ? 'Today' : new Date(d + 'T12:00:00').toLocaleDateString([], {weekday:'short'});
+    const w2 = wmoLookup(j.daily.weather_code[i]);
+    return { day: dow, ico: w2.ico, hi: Math.round(j.daily.temperature_2m_max[i]), lo: Math.round(j.daily.temperature_2m_min[i]) };
+  });
   return {
-    condition: cond,
-    ico: WEATHER_ICONS[cond],
-    temp: baseTemp,
-    feelsLike: baseTemp - 3,
-    humidity: 40 + Math.floor(Math.random() * 40),
-    wind: 5 + Math.floor(Math.random() * 15),
-    desc: HOURLY_DESC[cond],
-    location: 'Ontario, CA',
-    hourly, daily,
+    ico: now.ico, desc: now.desc,
+    temp: Math.round(cur.temperature_2m),
+    feelsLike: Math.round(cur.apparent_temperature),
+    humidity: Math.round(cur.relative_humidity_2m),
+    wind: Math.round(cur.wind_speed_10m),
+    location: loc.label,
+    unit, windUnit: unit === 'C' ? 'km/h' : 'mph',
+    daily,
     updated: new Date(),
   };
 }
 
-if(!S.weather) S.weather = generateWeather();
+// Orchestrates: read the saved setting → geocode once → fetch conditions.
+// Failures are stored on S.weather (not thrown away) so the widget can
+// show *why* it's not showing weather instead of going quiet.
+async function refreshWeather(){
+  const saved = getWeatherSetting();
+  const query = saved.query || '';
+  if(!query){ S.weather = { needsLocation: true }; if(S.activeTab==='home') renderContent(); return; }
+  try {
+    let loc = (saved.lat!=null && saved.lon!=null) ? saved : null;
+    if(!loc){
+      loc = await resolveWeatherLocation(query);
+      const toSave = { query, lat: loc.lat, lon: loc.lon, label: loc.label };
+      S.settings.weather_location = JSON.stringify(toSave);
+      try { await API.saveSetting('weather_location', JSON.stringify(toSave)); } catch(e){}
+    }
+    const unit = S.settings.weather_unit === 'C' ? 'C' : 'F';
+    S.weather = await fetchWeatherForLocation(loc, unit);
+  } catch(e){
+    S.weather = { error: e.message };
+  }
+  if(S.activeTab==='home') renderContent();
+}
 
-// Refresh weather every 30 min
-setInterval(() => { S.weather = generateWeather(); }, 30 * 60 * 1000);
+// Re-check every 30 min. The very first fetch is kicked off from loadData()
+// once S.settings is actually populated (see the patched loadData below) —
+// refreshWeather is a hoisted function declaration, so that forward
+// reference works regardless of source order.
+setInterval(refreshWeather, 30 * 60 * 1000);
 
 // ── SCREENSAVER ──
 function resetScreensaverTimer() {
@@ -3391,7 +3466,7 @@ function activateScreensaver() {
 
   const weatherEl = document.createElement('div');
   weatherEl.className = 'ss-weather';
-  if(S.weather) weatherEl.innerHTML = `${S.weather.ico} ${S.weather.temp}°F &nbsp;·&nbsp; ${S.weather.desc}`;
+  if(S.weather && S.weather.ico) weatherEl.innerHTML = `${S.weather.ico} ${S.weather.temp}°${S.weather.unit||'F'} &nbsp;·&nbsp; ${S.weather.desc}`;
 
   const tapEl = document.createElement('div');
   tapEl.className = 'ss-tap';
@@ -3496,14 +3571,28 @@ setInterval(() => {
 // ── WEATHER WIDGET BUILDER ──
 function buildWeatherWidget() {
   const w = S.weather;
-  if(!w) return r('div', {class:'weather-widget'}, '⏳ Loading weather...');
+  if(!w) return r('div', {class:'weather-widget card anim-in'}, '⏳ Loading weather…');
+
+  if(w.needsLocation) return r('div', {class:'weather-widget card anim-in'},
+    r('div', {style:{fontWeight:800,marginBottom:4}}, '📍 Add your location for weather'),
+    r('div', {style:{fontSize:'.78rem',color:'var(--text3)',marginBottom:10}},
+      'Enter a city or zip code in Settings → Weather.'),
+    r('button', {class:'btn btn-secondary',style:{fontSize:'.75rem'},
+      onClick:()=>{S.activeTab='settings';renderContent();}}, 'Go to Settings')
+  );
+
+  if(w.error) return r('div', {class:'weather-widget card anim-in'},
+    r('div', {style:{fontWeight:800,color:'var(--red)',marginBottom:4}}, '⚠️ Weather unavailable'),
+    r('div', {style:{fontSize:'.78rem',color:'var(--text3)',marginBottom:10}}, w.error),
+    r('button', {class:'btn btn-secondary',style:{fontSize:'.75rem'},onClick:()=>refreshWeather()}, 'Retry')
+  );
 
   return r('div', {class:'weather-widget card anim-in'},
     r('div', {style:{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12}},
       r('div', {class:'weather-main'},
         r('div', {class:'weather-ico'}, w.ico),
         r('div', {},
-          r('div', {class:'weather-temp'}, `${w.temp}°F`),
+          r('div', {class:'weather-temp'}, `${w.temp}°${w.unit||'F'}`),
           r('div', {class:'weather-desc'}, w.desc),
           r('div', {class:'weather-loc'}, `📍 ${w.location}`)
         )
@@ -3512,7 +3601,7 @@ function buildWeatherWidget() {
         r('div', {style:{fontSize:'.75rem', color:'var(--text3)', fontWeight:700, marginBottom:4}}, 'Feels like'),
         r('div', {style:{fontSize:'1.1rem', fontWeight:700}}, `${w.feelsLike}°`),
         r('div', {style:{fontSize:'.72rem', color:'var(--text3)', marginTop:8, fontWeight:700}}, `💧 ${w.humidity}%`),
-        r('div', {style:{fontSize:'.72rem', color:'var(--text3)', fontWeight:700}}, `💨 ${w.wind} mph`),
+        r('div', {style:{fontSize:'.72rem', color:'var(--text3)', fontWeight:700}}, `💨 ${w.wind} ${w.windUnit||'mph'}`),
       )
     ),
     r('div', {class:'weather-forecast'},
@@ -4228,6 +4317,60 @@ function buildSettings() {
       }, 'Edit')
     ));
 
+    // ── Weather Location ──
+    wrap.appendChild(r('div', {style:{fontSize:'.7rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.07em', color:'var(--text3)', marginBottom:8, marginTop:18}}, 'Weather'));
+    const savedLoc = getWeatherSetting();
+    const weatherInput = r('input', {class:'finput', placeholder:'City or 5-digit ZIP — e.g. "Ontario, CA" or 91761',
+      value: savedLoc.query || ''});
+    const curUnit = S.settings.weather_unit === 'C' ? 'C' : 'F';
+    const unitToggle = r('div', {class:'unit-toggle'},
+      r('button', {class:'unit-btn'+(curUnit==='F'?' on':''), onClick: async () => {
+        if(curUnit==='F') return;
+        S.settings.weather_unit='F'; try{ await API.saveSetting('weather_unit','F'); }catch(e){}
+        await refreshWeather(); refreshSettings();
+      }}, '°F'),
+      r('button', {class:'unit-btn'+(curUnit==='C'?' on':''), onClick: async () => {
+        if(curUnit==='C') return;
+        S.settings.weather_unit='C'; try{ await API.saveSetting('weather_unit','C'); }catch(e){}
+        await refreshWeather(); refreshSettings();
+      }}, '°C')
+    );
+    wrap.appendChild(r('div', {class:'setting-row', style:{alignItems:'flex-start'}},
+      r('div', {style:{flex:1, minWidth:0}},
+        r('div', {class:'setting-label'}, '📍 City or Zip'),
+        r('div', {style:{marginTop:6}}, weatherInput),
+        r('div', {class:'setting-val', style:{marginTop:6}},
+          S.weather && S.weather.location ? 'Showing: ' + S.weather.location
+          : S.weather && S.weather.error ? '⚠️ ' + S.weather.error
+          : 'Not set yet'
+        )
+      ),
+      r('button', {class:'btn btn-primary', style:{fontSize:'.72rem', padding:'6px 12px'},
+        onClick: async (e) => {
+          const q = weatherInput.value.trim();
+          if(!q){ showToast('Enter a city or zip code', false); return; }
+          const btn = e.currentTarget; btn.disabled = true; const prevLabel = btn.textContent; btn.textContent = 'Checking…';
+          try {
+            const loc = await resolveWeatherLocation(q);
+            const toSave = { query: q, lat: loc.lat, lon: loc.lon, label: loc.label };
+            S.settings.weather_location = JSON.stringify(toSave);
+            await API.saveSetting('weather_location', JSON.stringify(toSave));
+            await refreshWeather();
+            showToast('📍 Weather set to ' + loc.label);
+          } catch(err) {
+            showToast(err.message, false);
+          } finally {
+            btn.disabled = false; btn.textContent = prevLabel;
+            refreshSettings();
+          }
+        }
+      }, 'Save')
+    ));
+    wrap.appendChild(r('div', {class:'setting-row'},
+      r('div', {class:'setting-label'}, '🌡️ Units'),
+      unitToggle
+    ));
+
     // ── Sync status ──
     wrap.appendChild(r('div', {style:{fontSize:'.7rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.07em', color:'var(--text3)', marginBottom:8, marginTop:18}}, 'Sync & Devices'));
     wrap.appendChild(r('div', {class:'setting-row'},
@@ -4427,7 +4570,12 @@ function buildSettings() {
     ));
     wrap.appendChild(r('div', {class:'setting-row'},
       r('div', {class:'setting-label'}, 'Weather'),
-      r('div', {class:'setting-val'}, '🌤️ ' + (S.weather ? S.weather.desc : 'Loading...'))
+      r('div', {class:'setting-val'},
+        S.weather && S.weather.desc ? '🌤️ ' + S.weather.desc + ' — ' + S.weather.location
+        : S.weather && S.weather.needsLocation ? 'No location set (see Weather above)'
+        : S.weather && S.weather.error ? '⚠️ ' + S.weather.error
+        : 'Loading…'
+      )
     ));
   }
 
@@ -4583,10 +4731,10 @@ buildHome = function() {
   const todayEvts = S.events.filter(e => normDate(e.start_date) === td).sort((a,b) => (a.start_time||'') < (b.start_time||'') ? -1 : 1);
 
   // Weather strip for hero
-  const w = S.weather;
+  const w = (S.weather && !S.weather.needsLocation && !S.weather.error) ? S.weather : null;
   const heroWeather = w ? r('div', {class:'hero-weather'},
     r('span', {style:{fontSize:'1.6rem'}}, w.ico),
-    r('div', {class:'hero-weather-temp'}, `${w.temp}°F`),
+    r('div', {class:'hero-weather-temp'}, `${w.temp}°${w.unit||'F'}`),
     r('div', {class:'hero-weather-desc'}, `${w.desc} · ${w.location}`),
     r('div', {style:{marginLeft:'auto'}}, getSyncEl())
   ) : null;
