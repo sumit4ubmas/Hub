@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Home Hub"/>
 <title>Home Hub — Family</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -490,12 +494,71 @@ a:hover{color:var(--accent)}
 .hh-note-ach{background:#FFE6CF}
 .hh-note-bday{background:#FCDDE9}
 .hh-note-plan{background:#DDEEFF}
-.hh-fam{align-items:start}
+
 
 .hh-ag.next .hh-ag-time,.hh-ag.next .hh-ag-until{color:var(--ink)}
 [data-dark] .hh-ag:not(.next) .hh-ag-who,[data-dark] .hh-goal-togo,[data-dark] .hh-star-num small,[data-dark] .hh-routine-sub{color:var(--c-border)}
 [data-dark] .hh-ag.next .hh-ag-who{color:var(--c-text)}
 .hh-kid-hi{text-wrap:balance}
+
+.hh-fam{grid-template-columns:repeat(var(--n,4),minmax(0,1fr))}
+@media(max-width:720px){.hh-fam{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:440px){.hh-fam{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1100px){.hh-fam-card{padding:16px}.hh-fam-top .hh-av{width:52px!important;height:52px!important}.hh-fam-name{font-size:1.15rem}.hh-fam-list li{font-size:.95rem}}
+.hh-weather{display:inline-flex;align-items:center;gap:8px;margin-top:6px;min-height:40px;padding:4px 14px;border-radius:99px;border:none;background:var(--s2);color:var(--text);font-weight:700;font-size:.95rem;white-space:nowrap}
+.hh-weather:hover{background:var(--bg2)}
+.hh-weather .e{font-size:1.3rem;line-height:1}
+.hh-weather .t{font-size:1.15rem;font-weight:800}
+.hh-weather .hl{color:var(--text2);font-weight:600;font-size:.88rem}
+.hh-weather .lbl{color:var(--text3);font-weight:600;font-size:.88rem}
+.hh-weather.empty{color:var(--accent-ink);background:var(--accbg)}
+@media(max-width:1340px){.hh-weather{margin-top:0}}
+@media(max-width:1100px){.hh-weather .lbl{display:none}}
+@media(max-width:600px){.hh-weather .hl{display:none}}
+@media(display-mode:standalone){.hh-header{padding-top:max(18px,env(safe-area-inset-top))}}
+
+.hh-tip{position:fixed;z-index:700;width:300px;max-width:calc(100vw - 16px);background:var(--surface);border-radius:20px;padding:16px 18px;box-shadow:0 20px 50px -18px rgba(31,36,51,.4),0 0 0 1px var(--border);pointer-events:none;animation:scaleIn .14s var(--ease);border-top:6px solid var(--c-solid)}
+.hh-tip-head{display:flex;gap:10px;align-items:flex-start}
+.hh-tip-emoji{width:42px;height:42px;border-radius:12px;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.hh-tip-title{font-size:1.12rem;font-weight:800;line-height:1.25;padding-top:2px;text-wrap:pretty}
+.hh-tip-who{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 10px}
+.hh-tip-kind{font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
+.hh-tip-row{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:600;color:var(--text2);margin-top:6px}
+.hh-tip-row .hh-ico,.hh-tip-ico{color:var(--c-text);width:16px;text-align:center}
+.hh-tip-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hh-tip-tags span{background:var(--s2);padding:3px 10px;border-radius:99px;font-size:.82rem;font-weight:700;color:var(--text2)}
+.hh-tip-desc{margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:.92rem;line-height:1.5;color:var(--text);white-space:pre-wrap}
+
+.hh-today.empty{padding:20px 26px}
+.hh-today.empty .hh-today-head{margin-bottom:0;align-items:center}
+.hh-today.empty .hh-today-greet{font-size:1.7rem;margin-top:4px}
+.hh-today.empty .hh-today-sub{margin-top:2px}
+.hh-today.empty .orb{width:180px;height:180px;right:-50px;top:-60px}
+.hh-today.empty .spark.s2{display:none}
+@media(max-width:600px){.hh-today.empty{padding:16px}.hh-today.empty .hh-today-greet{font-size:1.4rem}}
+
+.hh-fam{align-items:stretch}
+.hh-fam-card{height:100%}
+.hh-fam-go{flex-shrink:0;display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 8px 0 12px;border:none;border-radius:12px;background:rgba(255,255,255,.8);color:var(--c-text);font-weight:800;font-size:.85rem;white-space:nowrap;transition:background .15s}
+.hh-fam-go:hover{background:#fff}
+[data-dark] .hh-fam-go{background:rgba(255,255,255,.12);color:var(--c-border)}
+@media(max-width:1100px){.hh-fam-go span{display:none}.hh-fam-go{width:44px;padding:0;justify-content:center}}
+
+.hh-today.empty{padding:18px 24px;text-align:left}
+.hh-today.empty .hh-today-head{flex-wrap:nowrap;align-items:center;gap:20px}
+.hh-today.empty .hh-today-head>div:first-child{text-align:left;flex:1;min-width:0}
+.hh-today.empty .hh-today-eyebrow,.hh-today.empty .spark{display:none}
+.hh-today.empty .hh-today-greet{font-size:1.5rem;margin-top:0;color:var(--text);text-wrap:pretty}
+.hh-today.empty .hh-today-sub{font-size:1rem;margin-top:2px}
+.hh-today.empty .orb{width:150px;height:150px;right:-60px;top:-70px;opacity:.35}
+.hh-fam-go span{display:inline}
+@media(max-width:1100px){.hh-fam-go>span:not(.hh-ico){display:none}}
+
+[data-dark] .sky-event,[data-dark] .sky-allday-ev{background:color-mix(in oklab,var(--ev-solid,#8A93A8) 40%,#1B1E26)!important;border-left-color:var(--ev-solid,#8A93A8)!important;color:#F2F4F8!important}
+[data-dark] .sky-event-title,[data-dark] .sky-allday-ev{color:#FFFFFF!important}
+[data-dark] .sky-event-time{color:#DDE2EC!important;opacity:1}
+[data-dark] .sky-event-av{background:var(--ev-solid,#8A93A8)!important;color:#14161C!important;border-color:rgba(0,0,0,.25)!important}
+[data-dark] .sky-event:hover{filter:brightness(1.12)}
 </style>
 </head>
 <body>
@@ -1738,7 +1801,7 @@ function buildSkylightCalendar(opts){
       ...allDayEvts[di].map(ev=>{
         const u=ev.assigned_to?getUser(ev.assigned_to):null;
         const p=u?getUserPastel(u.user_id):{bg:'var(--bg2)',border:'var(--border)',text:'var(--text2)'};
-        return r('div',{class:'sky-allday-ev',style:{background:p.bg,color:p.text,borderLeft:'3px solid '+p.border}},
+        return r('div',{class:'sky-allday-ev','data-tip':tipFor('ev',ev),style:{background:p.bg,color:p.text,borderLeft:'3px solid '+p.border}},
           ev.title+(u?' · '+u.name:'')
         );
       }),
@@ -1746,7 +1809,7 @@ function buildSkylightCalendar(opts){
         const u=getUser(t.assigned_to);
         const p=u?getUserPastel(u.user_id):{bg:'var(--bg2)',border:'var(--border)',text:'var(--text2)'};
         const done=t.status==='completed';
-        return r('div',{class:'sky-allday-ev',
+        return r('div',{class:'sky-allday-ev','data-tip':tipFor('task',t),
           style:{background:done?'var(--greenbg)':p.bg,color:done?'var(--green)':p.text,
             borderLeft:'3px solid '+(done?'var(--green)':p.border),
             textDecoration:done?'line-through':'none',cursor:'pointer'},
@@ -1804,7 +1867,7 @@ function buildSkylightCalendar(opts){
           const p=u?getUserPastel(u.user_id):{bg:'var(--bg2)',border:'var(--border)',text:'var(--text2)'};
           const top=Math.max(0,(it.start-START*60)/60*HH);
           const ht=it.htPx;
-          evtBlocks.push(r('div',{class:'sky-event',
+          evtBlocks.push(r('div',{class:'sky-event','data-tip':tipFor('ev',ev),
             style:{top:top+'px',height:ht+'px',background:p.bg,borderLeft:'3px solid '+p.border,color:p.text,...colStyle}},
             r('div',{class:'sky-event-title'},ev.title),
             ht>28?r('div',{class:'sky-event-time'},
@@ -1819,7 +1882,7 @@ function buildSkylightCalendar(opts){
           const top=Math.max(0,(it.start-START*60)/60*HH);
           const ht=it.htPx;
           const done=t.status==='completed';
-          taskBlocks.push(r('div',{class:'sky-event',
+          taskBlocks.push(r('div',{class:'sky-event','data-tip':tipFor('task',t),
             style:{top:top+'px',height:ht+'px',
               background:done?'var(--greenbg)':p.bg,
               borderLeft:'3px solid '+(done?'var(--green)':p.border),
@@ -2002,6 +2065,8 @@ function buildSettings(){
       }})
     ),
     buildThemePicker(),
+    r('div',{style:{fontSize:'.7rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:8,marginTop:18}},'Weather'),
+    r('div',{class:'setting-row'},r('div',{},r('div',{class:'setting-label'},'Weather location'),r('div',{class:'setting-val'},wxPrefs().place||'Not set — shows in the header')),r('button',{class:'btn btn-secondary',onClick:()=>setupWeather()},wxPrefs().lat!=null?'Change':'Set up')),
     r('div',{style:{fontSize:'.7rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:8,marginTop:18}},'Google Sheet Connection'),
     r('div',{class:'setting-row'},
       r('div',{},
@@ -2239,6 +2304,106 @@ function modalShell(title,body,footer){
   return close;
 }
 
+
+// ── WEATHER (Open-Meteo, no key) ──
+const WX_CODES={0:['☀️','Clear'],1:['🌤️','Mostly clear'],2:['⛅','Partly cloudy'],3:['☁️','Cloudy'],45:['🌫️','Fog'],48:['🌫️','Fog'],51:['🌦️','Drizzle'],53:['🌦️','Drizzle'],55:['🌦️','Drizzle'],56:['🌧️','Freezing drizzle'],57:['🌧️','Freezing drizzle'],61:['🌧️','Rain'],63:['🌧️','Rain'],65:['🌧️','Heavy rain'],66:['🌧️','Freezing rain'],67:['🌧️','Freezing rain'],71:['🌨️','Snow'],73:['🌨️','Snow'],75:['❄️','Heavy snow'],77:['🌨️','Snow'],80:['🌦️','Showers'],81:['🌧️','Showers'],82:['⛈️','Heavy showers'],85:['🌨️','Snow showers'],86:['🌨️','Snow showers'],95:['⛈️','Thunderstorm'],96:['⛈️','Thunderstorm'],99:['⛈️','Thunderstorm']};
+function wxPrefs(){ return lsGet('hh_weather_prefs',{unit:'fahrenheit',city:'',lat:null,lon:null,place:''}); }
+function wxCache(){ return lsGet('hh_weather_cache',null); }
+function weatherEl(){
+  const c=wxCache(), p=wxPrefs();
+  if(!c||!c.data){ return r('button',{id:'hh-weather',class:'hh-weather empty',onClick:()=>{ if(!p.lat) setupWeather(); else refreshWeather(true); }},'🌤️',r('span',{},p.lat?'Loading weather…':'Add weather')); }
+  const d=c.data, w=WX_CODES[d.code]||['🌡️',''], u=p.unit==='celsius'?'°':'°';
+  return r('button',{id:'hh-weather',class:'hh-weather',title:(p.place?p.place+' · ':'')+w[1]+' — tap to refresh',onClick:()=>refreshWeather(true)},
+    r('span',{class:'e','aria-hidden':'true'},w[0]),
+    r('span',{class:'t'},Math.round(d.temp)+u),
+    r('span',{class:'hl'},'H '+Math.round(d.hi)+u+' · L '+Math.round(d.lo)+u),
+    r('span',{class:'lbl'},w[1]));
+}
+function paintWeather(){ const old=document.getElementById('hh-weather'); if(old) old.replaceWith(weatherEl()); }
+async function refreshWeather(force){
+  const p=wxPrefs(); if(p.lat==null) return;
+  const c=wxCache();
+  if(!force&&c&&c.at&&Date.now()-c.at<30*60*1000&&c.unit===p.unit&&c.lat===p.lat) return;
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+p.lat+'&longitude='+p.lon+'&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit='+p.unit+'&timezone=auto&forecast_days=1';
+    const res=await fetch(url); if(!res.ok) throw new Error('weather '+res.status);
+    const j=await res.json();
+    lsSet('hh_weather_cache',{at:Date.now(),unit:p.unit,lat:p.lat,data:{temp:j.current.temperature_2m,code:j.current.weather_code,hi:j.daily.temperature_2m_max[0],lo:j.daily.temperature_2m_min[0]}});
+    paintWeather();
+  }catch(e){ if(force) showToast('Couldn’t load weather',false); }
+}
+async function geocodeCity(city){
+  const res=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name='+encodeURIComponent(city));
+  const j=await res.json(); const g=j.results&&j.results[0]; if(!g) throw new Error('City not found');
+  return {lat:+g.latitude.toFixed(3),lon:+g.longitude.toFixed(3),place:g.name+(g.admin1?', '+g.admin1:'')};
+}
+function setupWeather(){
+  const p=wxPrefs(); let city=p.city||'', unit=p.unit||'fahrenheit';
+  const inp=r('input',{class:'finput',placeholder:'e.g. Austin',value:city,onInput:e=>{city=e.target.value;}});
+  const seg=r('div',{class:'hh-seg'},...[['fahrenheit','°F'],['celsius','°C']].map(([k,l])=>r('button',{type:'button',class:k===unit?'on':'',onClick:ev=>{unit=k;seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===ev.currentTarget));}},l)));
+  const save=async loc=>{ lsSet('hh_weather_prefs',{unit,city:loc.city||city,lat:loc.lat,lon:loc.lon,place:loc.place||''}); localStorage.removeItem('hh_weather_cache'); close(); paintWeather(); await refreshWeather(true); showToast('Weather set for '+(loc.place||'your location')); };
+  const close=modalShell('Weather',[
+    r('div',{class:'fgroup'},r('label',{class:'flabel'},'Your town or city'),inp),
+    r('div',{class:'fgroup'},r('label',{class:'flabel'},'Units'),seg),
+    r('button',{class:'btn btn-secondary',style:{width:'100%'},onClick:()=>{
+      if(!navigator.geolocation){ showToast('Location isn’t available here — type a city',false); return; }
+      navigator.geolocation.getCurrentPosition(pos=>save({lat:+pos.coords.latitude.toFixed(3),lon:+pos.coords.longitude.toFixed(3),place:'Current location'}),()=>showToast('Location blocked — type a city instead',false),{timeout:10000});
+    }},'📍 Use my current location'),
+    r('div',{class:'hh-note-small',style:{marginTop:'10px'}},'Weather from Open-Meteo. Saved on this device and refreshed every 30 minutes.')
+  ],[
+    r('button',{class:'btn btn-secondary',onClick:()=>close()},'Cancel'),
+    r('button',{class:'btn btn-primary',onClick:async()=>{ if(!city.trim()) return; try{ const g=await geocodeCity(city.trim()); await save({...g,city:city.trim()}); }catch(e){ showToast(e.message,false); } }},'Save')]);
+  setTimeout(()=>inp.focus(),50);
+}
+setTimeout(()=>refreshWeather(false),800);
+setInterval(()=>refreshWeather(false),30*60*1000);
+
+
+// ── CALENDAR HOVER DETAILS ──
+const TIP_MAP=new Map(); let tipSeq=0;
+function tipFor(kind,obj){ const id='tp'+(++tipSeq); TIP_MAP.set(id,{kind,obj}); if(TIP_MAP.size>800){ TIP_MAP.delete(TIP_MAP.keys().next().value); } return id; }
+function longDate(d){ return d?new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'}):''; }
+function buildTipCard(kind,o){
+  const isEv=kind==='ev', uid=isEv?o.assigned_to:o.assigned_to, u=uid?getUser(uid):null, c=colorFor(uid);
+  const sd=normDate(isEv?o.start_date:o.due_date), ed=isEv?normDate(o.end_date):'', st=normTime(isEv?o.start_time:o.due_time), et=isEv?normTime(o.end_time):'';
+  let when=longDate(sd);
+  if(isEv&&ed&&ed!==sd) when=fmtDate(sd)+(st?' '+fmt12(st):'')+' – '+fmtDate(ed)+(et?' '+fmt12(et):'');
+  const time=isEv&&ed&&ed!==sd?'':(st?(isEv?fmt12(st)+(et?' – '+fmt12(et):''):'Due '+fmt12(st)):(isEv?'All day':'Anytime'));
+  let dur=''; if(isEv&&st&&et&&(!ed||ed===sd)){ const m=timeToMins(et)-timeToMins(st); if(m>0) dur=m>=60?(Math.floor(m/60)+' hr'+(m%60?' '+(m%60)+' min':'')):m+' min'; }
+  const rows=[];
+  rows.push(r('div',{class:'hh-tip-row'},icon('calendar',16),r('span',{},when)));
+  if(time) rows.push(r('div',{class:'hh-tip-row'},icon('clock',16),r('span',{},time+(dur?' · '+dur:''))));
+  if(!isEv){
+    rows.push(r('div',{class:'hh-tip-row'},icon('check-circle',16),r('span',{},o.status==='completed'?'Done ✓':isOverdue(o)?'Overdue':'To do')));
+    const extra=[o.category?catIcon(o.category)+' '+o.category:'',o.priority?o.priority+' priority':'',o.reward_points>0?'⭐ +'+o.reward_points:'',o.recurrence&&o.recurrence!=='None'?'🔁 '+recurrenceLabel(o.recurrence):''].filter(Boolean);
+    if(extra.length) rows.push(r('div',{class:'hh-tip-tags'},...extra.map(x=>r('span',{},x))));
+  }
+  if(o.location) rows.push(r('div',{class:'hh-tip-row'},r('span',{class:'hh-tip-ico'},'📍'),r('span',{},o.location)));
+  return r('div',{class:'hh-tip',style:cv(c),role:'tooltip'},
+    r('div',{class:'hh-tip-head'},r('span',{class:'hh-tip-emoji','aria-hidden':'true'},smartIcon(o.title,isEv?'📅':catIcon(o.category))),r('div',{class:'hh-tip-title'},o.title||'(untitled)')),
+    r('div',{class:'hh-tip-who'},memberChip(u),r('span',{class:'hh-tip-kind'},isEv?'Event':'To-do')),
+    ...rows,
+    o.description?r('div',{class:'hh-tip-desc'},o.description):null);
+}
+let tipEl=null, tipFor_=null;
+function hideTip(){ if(tipEl){ tipEl.remove(); tipEl=null; tipFor_=null; } }
+function showTip(target){
+  const d=TIP_MAP.get(target.getAttribute('data-tip')); if(!d) return;
+  if(tipFor_===target) return; hideTip();
+  tipEl=buildTipCard(d.kind,d.obj); tipFor_=target; document.body.appendChild(tipEl);
+  const b=target.getBoundingClientRect(), w=tipEl.offsetWidth, h=tipEl.offsetHeight, vw=window.innerWidth, vh=window.innerHeight, g=10;
+  let left=b.right+g; if(left+w>vw-8) left=b.left-w-g; if(left<8) left=Math.min(Math.max(8,b.left+b.width/2-w/2),vw-w-8);
+  let top=b.top; if(left===b.right+g||left===b.left-w-g){ top=Math.min(Math.max(8,b.top),vh-h-8); } else { top=b.bottom+g; if(top+h>vh-8) top=Math.max(8,b.top-h-g); }
+  tipEl.style.left=left+'px'; tipEl.style.top=top+'px';
+}
+document.addEventListener('mouseover',e=>{ const t=e.target.closest&&e.target.closest('[data-tip]'); if(t) showTip(t); else if(tipEl&&!e.target.closest('.hh-tip')) hideTip(); });
+document.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse') return; const t=e.target.closest&&e.target.closest('[data-tip]'); if(t){ const d=TIP_MAP.get(t.getAttribute('data-tip')); if(d&&d.kind==='ev'){ tipFor_===t?hideTip():showTip(t); } } else if(!e.target.closest('.hh-tip')) hideTip(); },true);
+window.addEventListener('scroll',hideTip,true);
+
+
+function tintTipEls(root){ (root.querySelectorAll?root.querySelectorAll('[data-tip]'):[]).forEach(el=>{ if(el.dataset.tinted) return; const d=TIP_MAP.get(el.getAttribute('data-tip')); if(!d) return; const c=colorFor(d.obj.assigned_to); el.style.setProperty('--ev-solid',c.solid); el.style.setProperty('--ev-border',c.border); el.dataset.tinted='1'; }); }
+new MutationObserver(ms=>{ for(const m of ms) m.addedNodes.forEach(n=>{ if(n.nodeType===1){ if(n.matches&&n.matches('[data-tip]')) tintTipEls(n.parentNode); else tintTipEls(n); } }); }).observe(document.getElementById('content'),{childList:true,subtree:true});
+
 // ── HEADER ──
 function renderTopBar(){
   const now=new Date(), cu=S.currentUser;
@@ -2251,7 +2416,7 @@ function renderTopBar(){
       r('div',{style:{minWidth:0}},r('div',{class:'hh-brand-sub'},'Home Hub'),r('div',{class:'hh-family'},familyName()))),
     r('div',{class:'hh-when'},
       r('div',{id:'topbar-date',class:'hh-date'},now.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})),
-      r('div',{id:'topbar-time',class:'hh-time'},now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}))),
+      r('div',{id:'topbar-time',class:'hh-time'},now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})),weatherEl()),
     r('div',{class:'hh-hright'},
       avs,
       r('button',{class:'hh-parent'+(S.isAdmin?' on':''),title:S.isAdmin?'Parent mode is on':'Enter parent mode',onClick:()=>{
@@ -2374,7 +2539,7 @@ function greetFor(p){ return {morning:'Good morning',afternoon:'Good afternoon',
 function greetEmoji(p){ return {morning:'☀️',afternoon:'🌤️',evening:'🌙'}[p]; }
 function buildToday(){
   const now=new Date(), part=dayPart(), agenda=todayAgenda(), day=now.toLocaleDateString([],{weekday:'long'});
-  const sub=agenda.length>=4?'Looks like a busy '+day+' — here’s what everyone has going on.':agenda.length?'A gentle '+day+' — here’s what’s coming up.':'Nothing on the calendar yet — enjoy a slow '+day+'.';
+  const sub=agenda.length>=4?'Looks like a busy '+day+' — here’s what everyone has going on.':agenda.length?'A gentle '+day+' — here’s what’s coming up.':'A quiet day — nothing scheduled yet. Enjoy a slow '+day+'.';
   const nextIdx=agenda.findIndex(a=>a.time&&!agendaPast(a));
   const rows=agenda.map((a,i)=>{
     const u=a.uid?getUser(a.uid):null, past=agendaPast(a), next=i===nextIdx;
@@ -2385,7 +2550,7 @@ function buildToday(){
         r('div',{class:'hh-ag-title'},a.title),
         r('div',{class:'hh-ag-who'},u?avatarEl(u,26):r('span',{class:'hh-chip-fam','aria-hidden':'true'},'👪'),r('span',{},u?u.name:'Everyone'),a.end&&a.time?r('span',{class:'hh-ag-until'},'until '+fmt12(a.end)):null)));
   });
-  return r('section',{class:'hh-today hh-'+part},
+  return r('section',{class:'hh-today hh-'+part+(agenda.length?'':' empty')},
     r('div',{class:'hh-today-decor','aria-hidden':'true'},r('span',{class:'orb'}),r('span',{class:'spark s1'},'✦'),r('span',{class:'spark s2'},'✦'),r('span',{class:'spark s3'},'✧')),
     r('div',{class:'hh-today-head'},
       r('div',{},
@@ -2393,7 +2558,7 @@ function buildToday(){
         r('h1',{class:'hh-today-greet'},greetFor(part)+', '+familyLabel()+' '+greetEmoji(part)),
         r('p',{class:'hh-today-sub'},sub)),
       r('button',{class:'hh-link',onClick:()=>{S.activeTab='calendar';renderContent();}},'Full calendar',icon('chevron-right',16))),
-    agenda.length?r('div',{class:'hh-agenda'},...rows):emptyState('🌤','A quiet day','Nothing scheduled yet.'));
+    agenda.length?r('div',{class:'hh-agenda'},...rows):null);
 }
 function memberProgress(uid){
   const prefs={morning:['Morning Routine','After School','Evening Routine','Bedtime Routine'],afternoon:['After School','Evening Routine','Bedtime Routine','Morning Routine'],evening:['Evening Routine','Bedtime Routine','After School','Morning Routine']}[dayPart()];
@@ -2416,13 +2581,14 @@ function buildMemberToday(u){
   open.slice(0,3).forEach(t=>lines.push({e:smartIcon(t.title,'✅'),t:t.title,time:normTime(t.due_time)}));
   const prog=kid?memberProgress(u.user_id):null;
   return r('div',{class:'hh-fam-card'+(kid?' kid':''),style:cv(c)},
-    r('div',{class:'hh-fam-top'},avatarEl(u,64),r('div',{style:{minWidth:0}},
+    r('div',{class:'hh-fam-top'},avatarEl(u,64),r('div',{style:{minWidth:0,flex:'1'}},
       r('div',{class:'hh-fam-name'},u.name),
-      kid?r('div',{class:'hh-fam-stars'},'⭐ '+userPoints(u.user_id)):r('div',{class:'hh-fam-role'},tasks.length?doneN+' of '+tasks.length+' done':'Parent'))),
+      kid?r('div',{class:'hh-fam-stars'},'⭐ '+userPoints(u.user_id)):r('div',{class:'hh-fam-role'},tasks.length?doneN+' of '+tasks.length+' done':'Parent')),
+      kid?r('button',{class:'hh-fam-go',title:'Open '+u.name+'’s day','aria-label':'Open '+u.name+'’s day',onClick:()=>selectUser(u)},r('span',{},'My day'),icon('chevron-right',16)):null),
     lines.length?r('ul',{class:'hh-fam-list'},...lines.slice(0,3).map(l=>r('li',{},r('span',{class:'e','aria-hidden':'true'},l.e),r('span',{class:'t'},l.t),l.time?r('span',{class:'tm'},fmt12(l.time)):null)))
       :r('div',{class:'hh-fam-free'},tasks.length?'All done for today ✨':'Free day ✨'),
     prog?r('div',{class:'hh-fam-rt'},r('div',{class:'hh-fam-rt-l'},prog.label+' · '+prog.st.filter(Boolean).length+' of '+prog.st.length),r('div',{class:'hh-dots'},...prog.st.map(d=>r('span',{class:d?'on':''})))):null,
-    kid?r('button',{class:'hh-fam-open',onClick:()=>selectUser(u)},'Open '+u.name+'’s day',icon('chevron-right',16)):null);
+  );
 }
 function momentContent(){
   const note=familyNotes()[0];
@@ -2455,7 +2621,7 @@ function buildFamilyMoment(){
 function buildHome(){
   return r('div',{class:'anim-in hh-home'},
     buildToday(),
-    r('section',{class:'hh-section'},r('div',{class:'hh-sec-head'},r('div',{class:'hh-sec-title'},'My family today')),r('div',{class:'hh-fam'},...S.users.map(buildMemberToday))),
+    r('section',{class:'hh-section'},r('div',{class:'hh-sec-head'},r('div',{class:'hh-sec-title'},'My family today')),r('div',{class:'hh-fam',style:{'--n':String(Math.min(Math.max(S.users.length,1),4))}},...S.users.map(buildMemberToday))),
     r('section',{class:'hh-section'},buildFamilyMoment()),
     r('section',{class:'hh-section hh-week'},
       r('div',{class:'hh-sec-head'},r('div',{class:'hh-sec-title'},'This week'),r('button',{class:'hh-link',onClick:()=>{S.activeTab='calendar';renderContent();}},'Open calendar',icon('chevron-right',16))),
